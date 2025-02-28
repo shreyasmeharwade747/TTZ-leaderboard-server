@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 import time
 import threading
 import traceback
-from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
@@ -16,8 +15,9 @@ import psycopg2.pool
 import dns.resolver
 from decimal import Decimal
 
-# Load environment variables
-load_dotenv()
+# Replace load_dotenv() with DATABASE_URL constant
+# Remove load_dotenv import
+DATABASE_URL = "postgresql://postgres.ldonzqwaxlugziqtqedy:9zp7YOepgnuCSsZD@aws-0-ap-south-1.pooler.supabase.com:5432/postgres"
 
 # Setup logging
 logging.basicConfig(
@@ -64,9 +64,10 @@ def get_ipv4_address(hostname):
 def init_db_pool():
     global db_pool
     try:
-        db_url = os.getenv('DATABASE_URL')
+        # Replace os.getenv() with DATABASE_URL constant
+        db_url = DATABASE_URL
         if not db_url:
-            raise ValueError("DATABASE_URL environment variable is not set")
+            raise ValueError("DATABASE_URL is not set")
         
         # Parse the URL and get IPv4 address
         parsed_url = urlparse(db_url)

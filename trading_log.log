@@ -203,3 +203,43 @@ FileNotFoundError: [Errno 2] No such file or directory
 2025-02-28 20:25:17,478 - INFO - Connected to account 239738452
 2025-02-28 20:25:19,965 - INFO - Metadata updated successfully
 2025-02-28 20:25:19,965 - INFO - Waiting for the next 5-minute mark. Waiting 280.034579 seconds.
+2025-02-28 20:30:01,280 - INFO - Connected to account 239740335
+2025-02-28 20:30:03,573 - INFO - Connected to account 239738452
+2025-02-28 20:30:05,055 - INFO - Metadata updated successfully
+2025-02-28 20:30:05,056 - INFO - Waiting for the next 5-minute mark. Waiting 294.943298 seconds.
+2025-02-28 20:35:01,188 - INFO - Connected to account 239740335
+2025-02-28 20:35:03,528 - INFO - Connected to account 239738452
+2025-02-28 20:35:10,175 - INFO - Metadata updated successfully
+2025-02-28 20:35:10,178 - INFO - Waiting for the next 5-minute mark. Waiting 289.821696 seconds.
+2025-02-28 20:40:01,070 - INFO - Connected to account 239740335
+2025-02-28 20:40:03,168 - INFO - Connected to account 239738452
+2025-02-28 20:40:04,657 - INFO - Metadata updated successfully
+2025-02-28 20:40:04,659 - INFO - Waiting for the next 5-minute mark. Waiting 295.340157 seconds.
+2025-02-28 20:45:00,973 - INFO - Connected to account 239740335
+2025-02-28 20:45:02,953 - INFO - Connected to account 239738452
+2025-02-28 20:45:03,175 - ERROR - Database connection error: connection pool exhausted
+2025-02-28 20:45:03,175 - ERROR - Error updating database: connection pool exhausted
+2025-02-28 20:45:03,798 - ERROR - Database connection error: connection pool exhausted
+2025-02-28 20:45:03,798 - ERROR - Error updating metadata: connection pool exhausted
+2025-02-28 20:45:03,798 - INFO - Waiting for the next 5-minute mark. Waiting 296.201482 seconds.
+2025-02-28 20:50:01,649 - INFO - Connected to account 239740335
+2025-02-28 20:50:01,869 - ERROR - Database connection error: connection pool exhausted
+2025-02-28 20:50:01,939 - ERROR - Error processing account 239740335: connection pool exhausted
+2025-02-28 20:50:03,145 - INFO - Connected to account 239738452
+2025-02-28 20:50:03,145 - ERROR - Database connection error: connection pool exhausted
+2025-02-28 20:50:03,145 - ERROR - Error processing account 239738452: connection pool exhausted
+2025-02-28 20:50:03,155 - INFO - Waiting for the next 5-minute mark. Waiting 296.844432 seconds.
+2025-02-28 20:55:02,156 - INFO - Connected to account 239740335
+2025-02-28 20:55:02,161 - ERROR - Database connection error: connection pool exhausted
+2025-02-28 20:55:02,161 - ERROR - Error processing account 239740335: connection pool exhausted
+2025-02-28 20:55:03,305 - INFO - Connected to account 239738452
+2025-02-28 20:55:03,307 - ERROR - Database connection error: connection pool exhausted
+2025-02-28 20:55:03,307 - ERROR - Error processing account 239738452: connection pool exhausted
+2025-02-28 20:55:03,309 - INFO - Waiting for the next 5-minute mark. Waiting 296.692079 seconds.
+2025-02-28 21:00:01,342 - INFO - Connected to account 239740335
+2025-02-28 21:00:01,342 - ERROR - Database connection error: connection pool exhausted
+2025-02-28 21:00:01,342 - ERROR - Error processing account 239740335: connection pool exhausted
+2025-02-28 21:00:02,168 - INFO - Connected to account 239738452
+2025-02-28 21:00:02,171 - ERROR - Database connection error: connection pool exhausted
+2025-02-28 21:00:02,172 - ERROR - Error processing account 239738452: connection pool exhausted
+2025-02-28 21:00:02,172 - INFO - Waiting for the next 5-minute mark. Waiting 297.827116 seconds.
