@@ -1,0 +1,119 @@
+2025-02-28 16:42:08,550 - ERROR - Database connection error: connection to server at "db.ldonzqwaxlugziqtqedy.supabase.co" (2406:da1a:6b0:f602:1f76:6550:99fb:43db), port 5432 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-02-28 16:42:08,556 - ERROR - Connection parameters: host=db.ldonzqwaxlugziqtqedy.supabase.co, dbname=postgres, user=postgres
+2025-02-28 16:45:03,550 - ERROR - Database connection error: connection to server at "db.ldonzqwaxlugziqtqedy.supabase.co" (2406:da1a:6b0:f602:1f76:6550:99fb:43db), port 5432 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-02-28 16:46:39,054 - ERROR - Database connection error: connection to server at "db.ldonzqwaxlugziqtqedy.supabase.co" (2406:da1a:6b0:f602:1f76:6550:99fb:43db), port 5432 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-02-28 16:49:50,940 - INFO - Starting main function.
+2025-02-28 16:49:58,920 - ERROR - Failed to connect to account 239242676: (-6, 'Terminal: Authorization failed')
+2025-02-28 16:49:58,922 - INFO - Waiting for the next 5-minute mark. Waiting 1.077596 seconds.
+2025-02-28 16:49:59,026 - ERROR - FastAPI server error: [Errno 2] No such file or directory
+Traceback (most recent call last):
+  File "d:\TTZ-leaderboard-server\app.py", line 326, in run_fastapi
+    uvicorn.run(
+    ~~~~~~~~~~~^
+        "app:app",
+        ^^^^^^^^^^
+    ...<4 lines>...
+        reload=False
+        ^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\main.py", line 579, in run
+    server.run()
+    ~~~~~~~~~~^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\server.py", line 66, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 720, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\server.py", line 70, in serve
+    await self._serve(sockets)
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\server.py", line 77, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\config.py", line 401, in load
+    self.ssl: ssl.SSLContext | None = create_ssl_context(
+                                      ~~~~~~~~~~~~~~~~~~^
+        keyfile=self.ssl_keyfile,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        ciphers=self.ssl_ciphers,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\config.py", line 114, in create_ssl_context
+    ctx.load_cert_chain(certfile, keyfile, get_password)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory
+
+2025-02-28 16:49:59,053 - ERROR - Application startup error: [Errno 2] No such file or directory
+Traceback (most recent call last):
+  File "d:\TTZ-leaderboard-server\app.py", line 345, in <module>
+    run_fastapi()
+    ~~~~~~~~~~~^^
+  File "d:\TTZ-leaderboard-server\app.py", line 326, in run_fastapi
+    uvicorn.run(
+    ~~~~~~~~~~~^
+        "app:app",
+        ^^^^^^^^^^
+    ...<4 lines>...
+        reload=False
+        ^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\main.py", line 579, in run
+    server.run()
+    ~~~~~~~~~~^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\server.py", line 66, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 720, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\server.py", line 70, in serve
+    await self._serve(sockets)
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\server.py", line 77, in _serve
+    config.load()
+    ~~~~~~~~~~~^^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\config.py", line 401, in load
+    self.ssl: ssl.SSLContext | None = create_ssl_context(
+                                      ~~~~~~~~~~~~~~~~~~^
+        keyfile=self.ssl_keyfile,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        ciphers=self.ssl_ciphers,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "c:\Users\shrey\AppData\Local\Programs\Python\Python313\Lib\site-packages\uvicorn\config.py", line 114, in create_ssl_context
+    ctx.load_cert_chain(certfile, keyfile, get_password)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory
+
+2025-02-28 16:53:33,329 - INFO - Starting main function.
+2025-02-28 16:53:35,523 - ERROR - Failed to connect to account 239242676: (-6, 'Terminal: Authorization failed')
+2025-02-28 16:53:35,524 - INFO - Waiting for the next 5-minute mark. Waiting 84.475309 seconds.
+2025-02-28 16:55:00,020 - ERROR - Failed to connect to account 239242676: (-6, 'Terminal: Authorization failed')
+2025-02-28 16:55:00,021 - INFO - Waiting for the next 5-minute mark. Waiting 299.978542 seconds.
+2025-02-28 16:57:17,680 - INFO - Starting main function.
+2025-02-28 16:57:22,659 - INFO - Connected to account 239738452
+2025-02-28 16:57:25,157 - ERROR - Error processing account 239738452: unsupported operand type(s) for *: 'NoneType' and 'float'
+2025-02-28 16:57:25,159 - INFO - Waiting for the next 5-minute mark. Waiting 154.840411 seconds.
