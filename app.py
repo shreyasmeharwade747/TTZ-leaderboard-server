@@ -117,7 +117,7 @@ def fetch_accounts():
     try:
         conn = get_db_connection()
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT account_id, server, password, contestant_name FROM leaderboard2")
+            cur.execute("SELECT account_id, server, password, contestant_name FROM leaderboard")
             accounts = cur.fetchall()
             return [dict(account) for account in accounts]
     finally:
@@ -152,7 +152,7 @@ def fetch_trading_data(account_id, contestant_name):
         starting_day_balance = INITIAL_BALANCE
         with get_db_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT starting_day_balance FROM leaderboard2 WHERE account_id = %s", (account_id,))
+                cur.execute("SELECT starting_day_balance FROM leaderboard WHERE account_id = %s", (account_id,))
                 result = cur.fetchone()
                 if result and result[0] is not None:
                     starting_day_balance = float(result[0])
@@ -163,7 +163,7 @@ def fetch_trading_data(account_id, contestant_name):
                 # Update starting day balance at 3:30 AM or 3:31 AM
                 if now.hour == 3 and now.minute in (30, 31):
                     starting_day_balance = float(account_info.equity)
-                    cur.execute("UPDATE leaderboard2 SET starting_day_balance = %s WHERE account_id = %s",
+                    cur.execute("UPDATE leaderboard SET starting_day_balance = %s WHERE account_id = %s",
                               (starting_day_balance, account_id))
                     conn.commit()
 
@@ -290,7 +290,7 @@ def update_leaderboard_db(data):
             breaches_json = json.dumps(data["breaches"], cls=DecimalEncoder)
             
             cur.execute("""
-                UPDATE leaderboard2 SET 
+                UPDATE leaderboard SET 
                     balance = %s::numeric,
                     equity = %s::numeric,
                     profit_loss = %s::numeric,
@@ -337,6 +337,48 @@ def update_leaderboard_db(data):
         if conn:
             return_db_connection(conn)
 
+@retry_on_dns_error()
+def update_metadata(all_account_data):
+    conn = None
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            # Calculate global trade counts
+            global_trade_counts = {}
+            for account_data in all_account_data:
+                if account_data and "symbol_trade_counts" in account_data:
+                    for symbol, count in account_data["symbol_trade_counts"].items():
+                        global_trade_counts[symbol] = global_trade_counts.get(symbol, 0) + int(count)
+
+            # Find the most traded symbol
+            most_traded_overall = None
+            if global_trade_counts:
+                most_traded_symbol = max(global_trade_counts.items(), key=lambda x: x[1])
+                most_traded_overall = {
+                    "most_traded_symbol": most_traded_symbol[0],
+                    "total_trades": most_traded_symbol[1],
+                    "global_trade_counts": global_trade_counts
+                }
+
+            # Update metadata table
+            metadata_json = json.dumps(most_traded_overall, cls=DecimalEncoder) if most_traded_overall else '{}'
+            cur.execute("""
+                INSERT INTO metadata (id, most_traded)
+                VALUES (1, %s::jsonb)
+                ON CONFLICT (id) DO UPDATE
+                SET most_traded = %s::jsonb,
+                    last_updated_time = NOW()
+            """, (metadata_json, metadata_json))
+            
+            conn.commit()
+            logging.info("Metadata updated successfully")
+    except Exception as e:
+        logging.error(f"Error updating metadata: {str(e)}")
+        traceback.print_exc()
+    finally:
+        if conn:
+            return_db_connection(conn)
+
 def main():
     global main_running
     if main_running:
@@ -349,10 +391,16 @@ def main():
         logging.info("Starting main function.")
         
         while True:
+            all_account_data = []
             for account in ACCOUNTS:
                 data = process_account(account)
                 if data:
+                    all_account_data.append(data)
                     time.sleep(0.5)
+
+            # Update metadata after processing all accounts
+            if all_account_data:
+                update_metadata(all_account_data)
 
             current_time = datetime.now()
             next_5_minute_mark = current_time.replace(second=0, microsecond=0) + timedelta(minutes=(5 - (current_time.minute % 5)))

@@ -193,3 +193,13 @@ FileNotFoundError: [Errno 2] No such file or directory
 2025-02-28 20:06:25,974 - INFO - Connected to account 239740335
 2025-02-28 20:06:28,135 - INFO - Connected to account 239738452
 2025-02-28 20:06:29,406 - INFO - Waiting for the next 5-minute mark. Waiting 210.593011 seconds.
+2025-02-28 20:10:01,100 - INFO - Connected to account 239740335
+2025-02-28 20:10:03,949 - INFO - Connected to account 239738452
+2025-02-28 20:10:05,168 - INFO - Waiting for the next 5-minute mark. Waiting 294.831961 seconds.
+2025-02-28 20:24:59,043 - INFO - Database connection pool initialized successfully using IPv4 address: 3.111.105.85
+2025-02-28 20:25:05,078 - INFO - Database connection pool initialized successfully using IPv4 address: 3.111.105.85
+2025-02-28 20:25:05,078 - INFO - Starting main function.
+2025-02-28 20:25:10,244 - INFO - Connected to account 239740335
+2025-02-28 20:25:17,478 - INFO - Connected to account 239738452
+2025-02-28 20:25:19,965 - INFO - Metadata updated successfully
+2025-02-28 20:25:19,965 - INFO - Waiting for the next 5-minute mark. Waiting 280.034579 seconds.
