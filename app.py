@@ -9,6 +9,12 @@ from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
+import socket
+from functools import wraps
+from urllib.parse import urlparse
+import psycopg2.pool
+import dns.resolver
+from decimal import Decimal
 
 # Load environment variables
 load_dotenv()
@@ -23,22 +29,100 @@ logging.basicConfig(
     ]
 )
 
-# Database connection setup
-def get_db_connection():
+DB_MIN_CONNECTIONS = 1
+DB_MAX_CONNECTIONS = 10
+db_pool = None
+
+def retry_on_dns_error(max_retries=3, delay=2):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            retries = 0
+            while retries < max_retries:
+                try:
+                    return func(*args, **kwargs)
+                except (socket.gaierror, socket.error) as e:
+                    retries += 1
+                    if retries == max_retries:
+                        logging.error(f"Max retries ({max_retries}) reached. Database connection failed: {str(e)}")
+                        raise
+                    logging.warning(f"Database connection attempt {retries} failed. Retrying in {delay} seconds...")
+                    time.sleep(delay)
+            return None
+        return wrapper
+    return decorator
+
+def get_ipv4_address(hostname):
     try:
-        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        # Force IPv4 DNS resolution
+        answers = dns.resolver.resolve(hostname, 'A')
+        return str(answers[0])
+    except Exception as e:
+        logging.error(f"DNS resolution error: {str(e)}")
+        raise
+
+def init_db_pool():
+    global db_pool
+    try:
+        db_url = os.getenv('DATABASE_URL')
+        if not db_url:
+            raise ValueError("DATABASE_URL environment variable is not set")
+        
+        # Parse the URL and get IPv4 address
+        parsed_url = urlparse(db_url)
+        ipv4_host = get_ipv4_address(parsed_url.hostname)
+        
+        # Simplified connection parameters
+        db_params = {
+            'host': ipv4_host,
+            'port': parsed_url.port or 5432,
+            'user': parsed_url.username,
+            'password': parsed_url.password,
+            'dbname': parsed_url.path.lstrip('/'),
+            'connect_timeout': 10,
+            'sslmode': 'require'
+        }
+        
+        db_pool = psycopg2.pool.SimpleConnectionPool(
+            DB_MIN_CONNECTIONS,
+            DB_MAX_CONNECTIONS,
+            **db_params
+        )
+        logging.info(f"Database connection pool initialized successfully using IPv4 address: {ipv4_host}")
+    except Exception as e:
+        logging.error(f"Failed to initialize database pool: {str(e)}")
+        raise
+
+@retry_on_dns_error()
+def get_db_connection():
+    global db_pool
+    if db_pool is None:
+        init_db_pool()
+    try:
+        conn = db_pool.getconn()
         return conn
     except Exception as e:
         logging.error(f"Database connection error: {str(e)}")
         raise
 
+def return_db_connection(conn):
+    global db_pool
+    if db_pool and conn:
+        db_pool.putconn(conn)
+
 # Get accounts from database
+@retry_on_dns_error()
 def fetch_accounts():
-    with get_db_connection() as conn:
+    conn = None
+    try:
+        conn = get_db_connection()
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT account_id, server, password, contestant_name FROM leaderboard")
+            cur.execute("SELECT account_id, server, password, contestant_name FROM leaderboard2")
             accounts = cur.fetchall()
             return [dict(account) for account in accounts]
+    finally:
+        if conn:
+            return_db_connection(conn)
 
 # Constants
 ACCOUNTS = fetch_accounts()
@@ -59,55 +143,61 @@ def fetch_trading_data(account_id, contestant_name):
     try:
         account_info = mt5.account_info()
         if not account_info:
-            raise ValueError(f"Failed to fetch data: {mt5.last_error()}")
+            logging.error(f"Failed to get account info for {account_id}: {mt5.last_error()}")
+            return None
 
         now = datetime.now()
         
-        # Get starting day balance from database
+        # Get starting day balance from database with default fallback
         starting_day_balance = INITIAL_BALANCE
         with get_db_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT starting_day_balance FROM leaderboard WHERE account_id = %s", (account_id,))
+                cur.execute("SELECT starting_day_balance FROM leaderboard2 WHERE account_id = %s", (account_id,))
                 result = cur.fetchone()
-                if result:
-                    starting_day_balance = result[0]
-                
+                if result and result[0] is not None:
+                    starting_day_balance = float(result[0])
+                else:
+                    # If no starting balance found, use current equity
+                    starting_day_balance = float(account_info.equity)
+                    
                 # Update starting day balance at 3:30 AM or 3:31 AM
                 if now.hour == 3 and now.minute in (30, 31):
-                    starting_day_balance = account_info.equity
-                    cur.execute("UPDATE leaderboard SET starting_day_balance = %s WHERE account_id = %s",
+                    starting_day_balance = float(account_info.equity)
+                    cur.execute("UPDATE leaderboard2 SET starting_day_balance = %s WHERE account_id = %s",
                               (starting_day_balance, account_id))
                     conn.commit()
 
-        # Calculate daily drawdown limit
-        daily_dd_limit = round(starting_day_balance * 0.97, 2)
+        # Calculate daily drawdown limit with null check
+        daily_dd_limit = round(float(starting_day_balance) * 0.97, 2) if starting_day_balance is not None else round(INITIAL_BALANCE * 0.97, 2)
 
         history_deals = mt5.history_deals_get(START_DATE, now)
-        
-        # Initialize variables for trading data
+        if history_deals is None:
+            logging.error(f"Failed to get history deals for {account_id}: {mt5.last_error()}")
+            history_deals = []
+            
+        # Initialize variables
         total_lots = 0
         winning_trades = 0
+        losing_trades = 0
         total_trades = 0
-        symbol_trade_count = {}  # Dictionary to count trades per symbol
-        
+        symbol_trade_count = {}
+        filtered_deals = []
+
         if history_deals:
             # Filter deals where entry == 0
-            filtered_deals = [deal for deal in history_deals if True]
+            filtered_deals = [deal for deal in history_deals if deal is not None]
 
-            total_lots = sum(deal.volume for deal in filtered_deals) / 2
-            winning_trades = sum(1 for deal in filtered_deals if deal.profit > 0) -1
-            total_trades = len(filtered_deals) // 2  # Each trade has two deals (open and close)
+            if filtered_deals:
+                total_lots = sum(deal.volume for deal in filtered_deals)
+                winning_trades = sum(1 for deal in filtered_deals if deal.profit > 0) - 1
+                losing_trades = sum(1 for deal in filtered_deals if deal.profit < 0)
+                total_trades = len(filtered_deals) // 2
 
-            # Count trades per symbol
-            for deal in filtered_deals:
-                symbol = deal.symbol
-                if symbol in symbol_trade_count:
-                    symbol_trade_count[symbol] += 1
-                else:
-                    symbol_trade_count[symbol] = 1
+                for deal in filtered_deals:
+                    symbol = deal.symbol
+                    symbol_trade_count[symbol] = symbol_trade_count.get(symbol, 0) + 1
 
         profit_loss = account_info.balance - INITIAL_BALANCE
-        losing_trades = sum(1 for deal in filtered_deals if deal.profit < 0)
 
         # Calculate average lots traded
         average_lots = round(total_lots / total_trades, 2) if total_trades > 0 else 0
@@ -180,76 +270,104 @@ def process_account(account):
     finally:
         mt5.shutdown()
 
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return str(obj)
+        return super(DecimalEncoder, self).default(obj)
+
+@retry_on_dns_error()
 def update_leaderboard_db(data):
+    conn = None
     try:
-        with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute("""
-                    UPDATE leaderboard SET 
-                        balance = %s,
-                        equity = %s,
-                        profit_loss = %s,
-                        return = %s,
-                        lots_traded = %s,
-                        average_lots = %s,
-                        most_traded_symbol = %s,
-                        total_trades = %s,
-                        winning_trades = %s,
-                        losing_trades = %s,
-                        win_rate = %s,
-                        starting_day_balance = %s,
-                        daily_dd_limit = %s,
-                        breached = %s,
-                        last_update_time = %s,
-                        symbol_trade_counts = %s,
-                        breaches = %s
-                    WHERE account_id = %s
-                """, (
-                    data["balance"],
-                    data["equity"],
-                    data["profit_loss"],
-                    data["return"],
-                    data["lots_traded"],
-                    data["average_lots"],
-                    data["most_traded_symbol"],
-                    data["total_trades"],
-                    data["winning_trades"],
-                    data["losing_trades"],
-                    data["win_rate"],
-                    data["starting_day_balance"],
-                    data["daily_dd_limit"],
-                    data["breached"],
-                    datetime.now(),
-                    json.dumps(data["symbol_trade_counts"]),
-                    json.dumps(data["breaches"]),
-                    data["account_id"]
-                ))
-                conn.commit()
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            # Convert numeric values to Decimal for database storage
+            symbol_trade_counts_json = json.dumps(
+                {k: str(v) for k, v in data["symbol_trade_counts"].items()}, 
+                cls=DecimalEncoder
+            )
+            breaches_json = json.dumps(data["breaches"], cls=DecimalEncoder)
+            
+            cur.execute("""
+                UPDATE leaderboard2 SET 
+                    balance = %s::numeric,
+                    equity = %s::numeric,
+                    profit_loss = %s::numeric,
+                    return = %s::numeric,
+                    lots_traded = %s::numeric,
+                    average_lots = %s::numeric,
+                    most_traded_symbol = %s,
+                    total_trades = %s,
+                    winning_trades = %s,
+                    losing_trades = %s,
+                    win_rate = %s::numeric,
+                    starting_day_balance = %s::numeric,
+                    daily_dd_limit = %s::numeric,
+                    breached = %s,
+                    last_update_time = %s,
+                    symbol_trade_counts = %s::jsonb,
+                    breaches = %s::jsonb
+                WHERE account_id = %s
+            """, (
+                Decimal(str(data["balance"])),
+                Decimal(str(data["equity"])),
+                Decimal(str(data["profit_loss"])),
+                Decimal(str(data["return"])),
+                Decimal(str(data["lots_traded"])),
+                Decimal(str(data["average_lots"])),
+                data["most_traded_symbol"],
+                int(data["total_trades"]),
+                int(data["winning_trades"]),
+                int(data["losing_trades"]),
+                Decimal(str(data["win_rate"])),
+                Decimal(str(data["starting_day_balance"])),
+                Decimal(str(data["daily_dd_limit"])),
+                data["breached"],
+                datetime.now(),
+                symbol_trade_counts_json,
+                breaches_json,
+                str(data["account_id"])
+            ))
+            conn.commit()
     except Exception as e:
         logging.error(f"Error updating database: {str(e)}")
+        traceback.print_exc()  # Add stack trace for better debugging
+    finally:
+        if conn:
+            return_db_connection(conn)
 
 def main():
     global main_running
     if main_running:
         logging.info("Main function is already running. Exiting.")
         return
-    main_running = True
-    logging.info("Starting main function.")
+    
+    try:
+        init_db_pool()
+        main_running = True
+        logging.info("Starting main function.")
+        
+        while True:
+            for account in ACCOUNTS:
+                data = process_account(account)
+                if data:
+                    time.sleep(0.5)
 
-    while True:
-        for account in ACCOUNTS:
-            data = process_account(account)
-            if data:
-                time.sleep(0.5)
-
-        current_time = datetime.now()
-        next_5_minute_mark = current_time.replace(second=0, microsecond=0) + timedelta(minutes=(5 - (current_time.minute % 5)))
-        time_to_wait = (next_5_minute_mark - current_time).total_seconds()
-        if time_to_wait < 0:
-            next_5_minute_mark += timedelta(minutes=5)
+            current_time = datetime.now()
+            next_5_minute_mark = current_time.replace(second=0, microsecond=0) + timedelta(minutes=(5 - (current_time.minute % 5)))
             time_to_wait = (next_5_minute_mark - current_time).total_seconds()
-        logging.info(f"Waiting for the next 5-minute mark. Waiting {time_to_wait} seconds.")
-        time.sleep(time_to_wait)
+            if time_to_wait < 0:
+                next_5_minute_mark += timedelta(minutes=5)
+                time_to_wait = (next_5_minute_mark - current_time).total_seconds()
+            logging.info(f"Waiting for the next 5-minute mark. Waiting {time_to_wait} seconds.")
+            time.sleep(time_to_wait)
+            
+    except Exception as e:
+        logging.error(f"Main function error: {str(e)}")
+    finally:
+        if db_pool:
+            db_pool.closeall()
 
 if __name__ == "__main__":
     try:

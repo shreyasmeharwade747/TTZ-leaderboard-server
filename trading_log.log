@@ -117,3 +117,79 @@ FileNotFoundError: [Errno 2] No such file or directory
 2025-02-28 16:57:22,659 - INFO - Connected to account 239738452
 2025-02-28 16:57:25,157 - ERROR - Error processing account 239738452: unsupported operand type(s) for *: 'NoneType' and 'float'
 2025-02-28 16:57:25,159 - INFO - Waiting for the next 5-minute mark. Waiting 154.840411 seconds.
+2025-02-28 19:09:16,786 - INFO - Starting main function.
+2025-02-28 19:09:26,429 - INFO - Connected to account 239738452
+2025-02-28 19:09:26,976 - ERROR - Error processing account 239738452: unsupported operand type(s) for *: 'NoneType' and 'float'
+2025-02-28 19:09:26,976 - INFO - Waiting for the next 5-minute mark. Waiting 33.023779 seconds.
+2025-02-28 19:14:14,800 - INFO - Starting main function.
+2025-02-28 19:14:18,929 - INFO - Connected to account 239738452
+2025-02-28 19:14:20,567 - INFO - Waiting for the next 5-minute mark. Waiting 39.432447 seconds.
+2025-02-28 19:15:00,028 - INFO - Connected to account 239738452
+2025-02-28 19:15:02,304 - INFO - Waiting for the next 5-minute mark. Waiting 297.695913 seconds.
+2025-02-28 19:20:00,030 - INFO - Connected to account 239738452
+2025-02-28 19:20:22,846 - ERROR - Database connection error: could not translate host name "db.ldonzqwaxlugziqtqedy.supabase.co" to address: No such host is known. 
+
+2025-02-28 19:20:22,846 - ERROR - Error updating database: could not translate host name "db.ldonzqwaxlugziqtqedy.supabase.co" to address: No such host is known. 
+
+2025-02-28 19:20:23,350 - INFO - Waiting for the next 5-minute mark. Waiting 276.64931 seconds.
+2025-02-28 19:23:38,247 - ERROR - Database connection error: [Errno 11001] getaddrinfo failed
+2025-02-28 19:23:38,247 - WARNING - Database connection attempt 1 failed. Retrying in 2 seconds...
+2025-02-28 19:23:40,254 - ERROR - Database connection error: [Errno 11001] getaddrinfo failed
+2025-02-28 19:23:40,254 - WARNING - Database connection attempt 2 failed. Retrying in 2 seconds...
+2025-02-28 19:23:42,264 - ERROR - Database connection error: [Errno 11001] getaddrinfo failed
+2025-02-28 19:23:42,264 - ERROR - Max retries (3) reached. Database connection failed: [Errno 11001] getaddrinfo failed
+2025-02-28 19:23:42,264 - WARNING - Database connection attempt 1 failed. Retrying in 2 seconds...
+2025-02-28 19:23:55,303 - ERROR - Database connection error: [Errno 11001] getaddrinfo failed
+2025-02-28 19:23:55,303 - WARNING - Database connection attempt 1 failed. Retrying in 2 seconds...
+2025-02-28 19:23:57,323 - ERROR - Database connection error: [Errno 11001] getaddrinfo failed
+2025-02-28 19:23:57,325 - WARNING - Database connection attempt 2 failed. Retrying in 2 seconds...
+2025-02-28 19:23:59,327 - ERROR - Database connection error: [Errno 11001] getaddrinfo failed
+2025-02-28 19:23:59,327 - ERROR - Max retries (3) reached. Database connection failed: [Errno 11001] getaddrinfo failed
+2025-02-28 19:23:59,327 - WARNING - Database connection attempt 2 failed. Retrying in 2 seconds...
+2025-02-28 19:24:12,376 - ERROR - Database connection error: [Errno 11001] getaddrinfo failed
+2025-02-28 19:24:12,376 - WARNING - Database connection attempt 1 failed. Retrying in 2 seconds...
+2025-02-28 19:24:14,399 - ERROR - Database connection error: [Errno 11001] getaddrinfo failed
+2025-02-28 19:24:14,399 - WARNING - Database connection attempt 2 failed. Retrying in 2 seconds...
+2025-02-28 19:24:16,404 - ERROR - Database connection error: [Errno 11001] getaddrinfo failed
+2025-02-28 19:24:16,404 - ERROR - Max retries (3) reached. Database connection failed: [Errno 11001] getaddrinfo failed
+2025-02-28 19:24:16,404 - ERROR - Max retries (3) reached. Database connection failed: [Errno 11001] getaddrinfo failed
+2025-02-28 19:28:33,093 - INFO - Database connection pool initialized successfully
+2025-02-28 19:28:33,335 - ERROR - Failed to initialize database pool: could not translate host name "aws-0-ap-south-1.pooler.supabase.com" to address: No such host is known. 
+
+2025-02-28 19:28:33,339 - ERROR - Main function error: could not translate host name "aws-0-ap-south-1.pooler.supabase.com" to address: No such host is known. 
+
+2025-02-28 19:30:19,328 - ERROR - Failed to initialize database pool: invalid dsn: invalid connection option "tcp_keepalives_idle"
+
+2025-02-28 19:31:29,262 - INFO - Database connection pool initialized successfully using IPv4 address: 3.111.105.85
+2025-02-28 19:31:32,230 - INFO - Database connection pool initialized successfully using IPv4 address: 3.108.251.216
+2025-02-28 19:31:32,230 - INFO - Starting main function.
+2025-02-28 19:31:36,048 - INFO - Connected to account 239738452
+2025-02-28 19:31:36,587 - ERROR - Error updating database: Object of type Decimal is not JSON serializable
+2025-02-28 19:31:37,094 - INFO - Waiting for the next 5-minute mark. Waiting 202.905317 seconds.
+2025-02-28 19:36:20,381 - INFO - Database connection pool initialized successfully using IPv4 address: 3.111.105.85
+2025-02-28 19:36:23,359 - INFO - Database connection pool initialized successfully using IPv4 address: 3.111.105.85
+2025-02-28 19:36:23,359 - INFO - Starting main function.
+2025-02-28 19:36:27,211 - INFO - Connected to account 239738452
+2025-02-28 19:36:28,468 - INFO - Waiting for the next 5-minute mark. Waiting 211.531402 seconds.
+2025-02-28 19:56:31,290 - INFO - Database connection pool initialized successfully using IPv4 address: 3.111.105.85
+2025-02-28 19:56:34,250 - INFO - Database connection pool initialized successfully using IPv4 address: 3.108.251.216
+2025-02-28 19:56:34,250 - INFO - Starting main function.
+2025-02-28 19:56:38,312 - INFO - Connected to account 239740335
+2025-02-28 19:56:39,638 - INFO - Waiting for the next 5-minute mark. Waiting 200.361323 seconds.
+2025-02-28 20:00:00,030 - INFO - Connected to account 239740335
+2025-02-28 20:00:00,986 - INFO - Waiting for the next 5-minute mark. Waiting 299.013665 seconds.
+2025-02-28 20:02:24,781 - INFO - Database connection pool initialized successfully using IPv4 address: 3.111.105.85
+2025-02-28 20:02:27,667 - INFO - Database connection pool initialized successfully using IPv4 address: 3.108.251.216
+2025-02-28 20:02:27,667 - INFO - Starting main function.
+2025-02-28 20:02:31,473 - INFO - Connected to account 239740335
+2025-02-28 20:02:33,399 - INFO - Connected to account 239738452
+2025-02-28 20:02:34,385 - INFO - Waiting for the next 5-minute mark. Waiting 145.614622 seconds.
+2025-02-28 20:05:01,270 - INFO - Connected to account 239740335
+2025-02-28 20:05:03,271 - INFO - Connected to account 239738452
+2025-02-28 20:05:04,452 - INFO - Waiting for the next 5-minute mark. Waiting 295.547866 seconds.
+2025-02-28 20:06:19,166 - INFO - Database connection pool initialized successfully using IPv4 address: 3.111.105.85
+2025-02-28 20:06:22,144 - INFO - Database connection pool initialized successfully using IPv4 address: 3.108.251.216
+2025-02-28 20:06:22,144 - INFO - Starting main function.
+2025-02-28 20:06:25,974 - INFO - Connected to account 239740335
+2025-02-28 20:06:28,135 - INFO - Connected to account 239738452
+2025-02-28 20:06:29,406 - INFO - Waiting for the next 5-minute mark. Waiting 210.593011 seconds.
