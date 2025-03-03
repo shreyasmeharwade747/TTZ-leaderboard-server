@@ -1,0 +1,4 @@
+MetaTrader5==5.0.45
+psycopg2-binary==2.9.9
+python-dotenv==1.0.0
+dnspython==2.4.2
