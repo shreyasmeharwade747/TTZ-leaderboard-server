@@ -79,6 +79,10 @@ def fetch_trading_data(account_id, contestant_name):
             logging.error(f"Failed to get account info for {account_id}: {mt5.last_error()}")
             return None
 
+        # Get number of open positions
+        positions = mt5.positions_get()
+        open_positions_count = len(positions) if positions is not None else 0
+
         now = datetime.now()
         
         # Get starting day balance from database with default fallback
@@ -187,7 +191,8 @@ def fetch_trading_data(account_id, contestant_name):
             "starting_day_balance": starting_day_balance,
             "daily_dd_limit": daily_dd_limit,
             "breaches": breaches,
-            "breached": is_breached
+            "breached": is_breached,
+            "open_positions": open_positions_count  # Add open positions count
         }
     except Exception as e:
         logging.error(f"Error processing account {account_id}: {str(e)}")
@@ -239,7 +244,8 @@ def update_leaderboard_db(data):
                     breached = %s,
                     last_update_time = %s,
                     symbol_trade_counts = %s::jsonb,
-                    breaches = %s::jsonb
+                    breaches = %s::jsonb,
+                    open_positions = %s::numeric
                 WHERE account_id = %s
             """, (
                 Decimal(str(data["balance"])),
@@ -259,6 +265,7 @@ def update_leaderboard_db(data):
                 datetime.now(),
                 symbol_trade_counts_json,
                 breaches_json,
+                Decimal(str(data["open_positions"])),  # Add open_positions parameter
                 str(data["account_id"])
             ))
             conn.commit()

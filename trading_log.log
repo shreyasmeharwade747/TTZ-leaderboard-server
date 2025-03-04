@@ -543,3 +543,9 @@ server closed the connection unexpectedly
 2025-03-04 11:30:05,919 - INFO - Connected to account 239738452
 2025-03-04 11:30:07,624 - INFO - Metadata updated successfully
 2025-03-04 11:30:07,626 - INFO - Waiting for the next 5-minute mark. Waiting 292.374018 seconds.
+2025-03-04 15:07:24,747 - INFO - Starting main function.
+2025-03-04 15:07:25,093 - INFO - Database pool recreated successfully
+2025-03-04 15:07:32,407 - INFO - Connected to account 239740335
+2025-03-04 15:07:35,707 - INFO - Connected to account 239738452
+2025-03-04 15:07:36,863 - INFO - Metadata updated successfully
+2025-03-04 15:07:36,866 - INFO - Waiting for the next 5-minute mark. Waiting 143.134731 seconds.
