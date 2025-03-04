@@ -483,3 +483,63 @@ server closed the connection unexpectedly
 2025-03-01 12:25:03,462 - INFO - Connected to account 239738452
 2025-03-01 12:25:04,572 - INFO - Metadata updated successfully
 2025-03-01 12:25:04,587 - INFO - Waiting for the next 5-minute mark. Waiting 295.412371 seconds.
+2025-03-04 10:44:40,348 - ERROR - Database connection error: connection to server at "aws-0-ap-south-1.pooler.supabase.com" (3.111.105.85), port 5432 failed: error received from server in SCRAM exchange: Wrong password
+
+2025-03-04 10:47:23,674 - ERROR - Failed to initialize database pool: connection to server at "3.111.105.85", port 5432 failed: error received from server in SCRAM exchange: Wrong password
+
+2025-03-04 10:52:41,558 - INFO - Database connection pool initialized successfully using session pooler at: 3.111.105.85
+2025-03-04 10:54:06,110 - ERROR - Failed to initialize database pool: connection to server at "3.108.251.216", port 5432 failed: error received from server in SCRAM exchange: Wrong password
+
+2025-03-04 10:54:42,473 - ERROR - Failed to initialize database pool: connection to server at "3.108.251.216", port 5432 failed: error received from server in SCRAM exchange: Wrong password
+
+2025-03-04 10:57:23,801 - INFO - Database connection pool initialized successfully using session pooler
+2025-03-04 10:58:27,503 - ERROR - Failed to initialize database pool: connection to server at "aws-0-ap-south-1.pooler.supabase.com" (3.111.105.85), port 5432 failed: error received from server in SCRAM exchange: Wrong password
+
+2025-03-04 10:59:25,513 - ERROR - Failed to initialize database pool: connection to server at "aws-0-ap-south-1.pooler.supabase.com" (3.111.105.85), port 5432 failed: error received from server in SCRAM exchange: Wrong password
+
+2025-03-04 11:00:13,667 - ERROR - Failed to initialize database pool: connection to server at "aws-0-ap-south-1.pooler.supabase.com" (3.108.251.216), port 5432 failed: error received from server in SCRAM exchange: Wrong password
+
+2025-03-04 11:01:41,531 - ERROR - Failed to initialize database pool: connection to server at "aws-0-ap-south-1.pooler.supabase.com" (3.108.251.216), port 5432 failed: error received from server in SCRAM exchange: Wrong password
+
+2025-03-04 11:02:19,893 - INFO - Database connection pool initialized successfully using session pooler
+2025-03-04 11:02:20,363 - INFO - Database connection pool initialized successfully using session pooler
+2025-03-04 11:02:20,365 - INFO - Starting main function.
+2025-03-04 11:02:45,176 - INFO - Connected to account 239738452
+2025-03-04 11:02:55,874 - INFO - Connected to account 239740335
+2025-03-04 11:02:56,291 - ERROR - Database connection error: connection to server at "aws-0-ap-south-1.pooler.supabase.com" (3.111.105.85), port 5432 failed: error received from server in SCRAM exchange: Wrong password
+
+2025-03-04 11:02:56,292 - ERROR - Error updating database: connection to server at "aws-0-ap-south-1.pooler.supabase.com" (3.111.105.85), port 5432 failed: error received from server in SCRAM exchange: Wrong password
+
+2025-03-04 11:02:57,558 - INFO - Metadata updated successfully
+2025-03-04 11:02:57,635 - INFO - Waiting for the next 5-minute mark. Waiting 122.440255 seconds.
+2025-03-04 11:06:51,688 - INFO - Starting main function.
+2025-03-04 11:07:05,601 - INFO - Connected to account 239740335
+2025-03-04 11:07:13,678 - INFO - Connected to account 239738452
+2025-03-04 11:07:14,913 - INFO - Metadata updated successfully
+2025-03-04 11:07:14,914 - INFO - Waiting for the next 5-minute mark. Waiting 165.085782 seconds.
+2025-03-04 11:13:20,131 - INFO - Starting main function.
+2025-03-04 11:13:20,561 - INFO - Database pool recreated successfully
+2025-03-04 11:13:27,160 - INFO - Connected to account 239740335
+2025-03-04 11:13:30,451 - INFO - Connected to account 239738452
+2025-03-04 11:13:32,124 - INFO - Metadata updated successfully
+2025-03-04 11:13:32,157 - INFO - Waiting for the next 5-minute mark. Waiting 87.8737 seconds.
+2025-03-04 11:15:00,399 - INFO - Database pool recreated successfully
+2025-03-04 11:15:02,759 - INFO - Connected to account 239740335
+2025-03-04 11:15:06,066 - INFO - Connected to account 239738452
+2025-03-04 11:15:07,612 - INFO - Metadata updated successfully
+2025-03-04 11:15:07,614 - INFO - Waiting for the next 5-minute mark. Waiting 292.385747 seconds.
+2025-03-04 11:20:16,049 - INFO - Database pool recreated successfully
+2025-03-04 11:20:18,109 - INFO - Connected to account 239740335
+2025-03-04 11:20:20,994 - INFO - Connected to account 239738452
+2025-03-04 11:20:22,080 - INFO - Metadata updated successfully
+2025-03-04 11:20:22,082 - INFO - Waiting for the next 5-minute mark. Waiting 277.917716 seconds.
+2025-03-04 11:25:00,434 - INFO - Database pool recreated successfully
+2025-03-04 11:25:02,994 - INFO - Connected to account 239740335
+2025-03-04 11:25:08,172 - INFO - Connected to account 239738452
+2025-03-04 11:25:09,412 - INFO - Metadata updated successfully
+2025-03-04 11:25:09,413 - INFO - Waiting for the next 5-minute mark. Waiting 290.586724 seconds.
+2025-03-04 11:30:00,253 - INFO - Database pool recreated successfully
+2025-03-04 11:30:02,971 - INFO - Connected to account 239740335
+2025-03-04 11:30:05,919 - INFO - Connected to account 239738452
+2025-03-04 11:30:07,624 - INFO - Metadata updated successfully
+2025-03-04 11:30:07,626 - INFO - Waiting for the next 5-minute mark. Waiting 292.374018 seconds.
