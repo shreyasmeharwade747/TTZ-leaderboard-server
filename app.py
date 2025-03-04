@@ -126,7 +126,7 @@ def fetch_trading_data(account_id, contestant_name):
 
             if filtered_deals:
                 total_lots = sum(deal.volume for deal in filtered_deals)
-                winning_trades = sum(1 for deal in filtered_deals if deal.profit > 0) - 1
+                winning_trades = sum(1 for deal in filtered_deals if deal.profit > 0)
                 losing_trades = sum(1 for deal in filtered_deals if deal.profit < 0)
                 total_trades = len(filtered_deals) // 2
 
