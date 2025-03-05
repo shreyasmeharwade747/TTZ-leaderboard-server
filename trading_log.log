@@ -549,3 +549,24 @@ server closed the connection unexpectedly
 2025-03-04 15:07:35,707 - INFO - Connected to account 239738452
 2025-03-04 15:07:36,863 - INFO - Metadata updated successfully
 2025-03-04 15:07:36,866 - INFO - Waiting for the next 5-minute mark. Waiting 143.134731 seconds.
+2025-03-05 10:29:35,274 - INFO - Starting main function.
+2025-03-05 10:29:35,888 - INFO - Database pool recreated successfully
+2025-03-05 10:29:48,443 - INFO - Connected to account 239740335
+2025-03-05 10:29:50,054 - INFO - Skipping update for breached account 239738452
+2025-03-05 10:29:50,455 - INFO - Metadata updated successfully
+2025-03-05 10:29:50,456 - INFO - Waiting for the next 5-minute mark. Waiting 9.543985 seconds.
+2025-03-05 10:30:00,251 - INFO - Database pool recreated successfully
+2025-03-05 10:30:00,375 - INFO - Connected to account 239740335
+2025-03-05 10:30:01,470 - INFO - Skipping update for breached account 239738452
+2025-03-05 10:30:01,569 - INFO - Metadata updated successfully
+2025-03-05 10:30:01,570 - INFO - Waiting for the next 5-minute mark. Waiting 298.429865 seconds.
+2025-03-05 10:35:00,968 - INFO - Database pool recreated successfully
+2025-03-05 10:35:01,086 - INFO - Connected to account 239740335
+2025-03-05 10:35:02,223 - INFO - Skipping update for breached account 239738452
+2025-03-05 10:35:02,336 - INFO - Metadata updated successfully
+2025-03-05 10:35:02,338 - INFO - Waiting for the next 5-minute mark. Waiting 297.661512 seconds.
+2025-03-05 10:40:00,277 - INFO - Database pool recreated successfully
+2025-03-05 10:40:00,435 - INFO - Connected to account 239740335
+2025-03-05 10:40:03,246 - INFO - Skipping update for breached account 239738452
+2025-03-05 10:40:03,629 - INFO - Metadata updated successfully
+2025-03-05 10:40:03,630 - INFO - Waiting for the next 5-minute mark. Waiting 296.369794 seconds.

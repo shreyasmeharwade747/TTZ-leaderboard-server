@@ -198,11 +198,32 @@ def fetch_trading_data(account_id, contestant_name):
         logging.error(f"Error processing account {account_id}: {str(e)}")
         return None
 
+def fetch_breach_status(account_id):
+    conn = None
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("SELECT breached FROM leaderboard WHERE account_id = %s", (account_id,))
+            result = cur.fetchone()
+            return result[0] if result else False
+    except Exception as e:
+        logging.error(f"Error fetching breach status: {str(e)}")
+        return False
+    finally:
+        if conn:
+            return_db_connection(conn)
+
 def process_account(account):
     try:
+        # Check if account is already breached
+        if fetch_breach_status(account["account_id"]):
+            logging.info(f"Skipping update for breached account {account['account_id']}")
+            return None
+            
         if connect_to_mt5(account):
             data = fetch_trading_data(account["account_id"], account["contestant_name"])
             if data:
+                # Only update if the account wasn't previously breached
                 update_leaderboard_db(data)
             return data
     finally:
@@ -219,6 +240,13 @@ def update_leaderboard_db(data):
     try:
         conn = get_db_connection()
         with conn.cursor() as cur:
+            # First check if account is already breached
+            cur.execute("SELECT breached FROM leaderboard WHERE account_id = %s", (str(data["account_id"]),))
+            result = cur.fetchone()
+            if result and result[0]:
+                logging.info(f"Skipping DB update for breached account {data['account_id']}")
+                return
+
             # Convert numeric values to Decimal for database storage
             symbol_trade_counts_json = json.dumps(
                 {k: str(v) for k, v in data["symbol_trade_counts"].items()}, 
