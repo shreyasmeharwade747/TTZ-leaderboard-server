@@ -17,7 +17,12 @@ DB_CONFIG = {
     'user': 'postgres.ldonzqwaxlugziqtqedy',
     'password': 'Shreyas@ttz',
     'dbname': 'postgres',
-    'sslmode': 'require'
+    'sslmode': 'require',
+    'connect_timeout': 10,  # Add timeout
+    'keepalives': 1,
+    'keepalives_idle': 30,
+    'keepalives_interval': 10,
+    'keepalives_count': 5
 }
 
 # Setup logging
@@ -29,6 +34,18 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
+class DatabasePool:
+    def __init__(self):
+        self.pool = None
+
+    def __enter__(self):
+        self.pool = psycopg2.pool.SimpleConnectionPool(5, 20, **DB_CONFIG)  # Increased pool size
+        return self.pool
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.pool:
+            self.pool.closeall()
 
 # Initialize connection pool
 db_pool = psycopg2.pool.SimpleConnectionPool(1, 10, **DB_CONFIG)
@@ -57,10 +74,22 @@ def fetch_accounts():
         if conn:
             return_db_connection(conn)
 
+def fetch_all_breach_statuses():
+    """Fetch breach status for all accounts in one query"""
+    conn = None
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("SELECT account_id, breached FROM leaderboard")
+            return {str(row[0]): row[1] for row in cur.fetchall()}
+    finally:
+        if conn:
+            return_db_connection(conn)
+
 # Constants
 ACCOUNTS = fetch_accounts()
 INITIAL_BALANCE = 100000
-START_DATE = datetime(2025, 1, 19)
+START_DATE = datetime(2025, 3, 1)
 main_running = False
 
 def connect_to_mt5(account):
@@ -72,36 +101,30 @@ def connect_to_mt5(account):
     logging.error(f"Failed to connect to account {account['account_id']}: {mt5.last_error()}")
     return False
 
-def fetch_trading_data(account_id, contestant_name):
+def fetch_trading_data(account_id, contestant_name, starting_day_balances):
+    """Modified to accept pre-fetched starting day balances"""
     try:
         account_info = mt5.account_info()
         if not account_info:
             logging.error(f"Failed to get account info for {account_id}: {mt5.last_error()}")
             return None
 
-        # Get number of open positions
         positions = mt5.positions_get()
         open_positions_count = len(positions) if positions is not None else 0
-
         now = datetime.now()
         
-        # Get starting day balance from database with default fallback
-        starting_day_balance = INITIAL_BALANCE
-        with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT starting_day_balance FROM leaderboard WHERE account_id = %s", (account_id,))
-                result = cur.fetchone()
-                if result and result[0] is not None:
-                    starting_day_balance = float(result[0])
-                else:
-                    # If no starting balance found, use current equity
-                    starting_day_balance = float(account_info.equity)
-                    
-                # Update starting day balance at 3:30 AM or 3:31 AM
-                if now.hour == 3 and now.minute in (30, 31):
-                    starting_day_balance = float(account_info.equity)
-                    cur.execute("UPDATE leaderboard SET starting_day_balance = %s WHERE account_id = %s",
-                              (starting_day_balance, account_id))
+        # Use pre-fetched starting day balance
+        starting_day_balance = starting_day_balances.get(str(account_id), INITIAL_BALANCE)
+        
+        # Update starting day balance at 3:30 AM
+        if now.hour == 3 and now.minute in (30, 31):
+            starting_day_balance = float(account_info.equity)
+            with get_db_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "UPDATE leaderboard SET starting_day_balance = %s WHERE account_id = %s::numeric",
+                        (starting_day_balance, str(account_id))
+                    )
                     conn.commit()
 
         # Calculate daily drawdown limit with null check
@@ -203,7 +226,7 @@ def fetch_breach_status(account_id):
     try:
         conn = get_db_connection()
         with conn.cursor() as cur:
-            cur.execute("SELECT breached FROM leaderboard WHERE account_id = %s", (account_id,))
+            cur.execute("SELECT breached FROM leaderboard WHERE account_id = %s::numeric", (str(account_id),))
             result = cur.fetchone()
             return result[0] if result else False
     except Exception as e:
@@ -224,8 +247,7 @@ def process_account(account):
             data = fetch_trading_data(account["account_id"], account["contestant_name"])
             if data:
                 # Only update if the account wasn't previously breached
-                update_leaderboard_db(data)
-            return data
+                return data
     finally:
         mt5.shutdown()
 
@@ -235,71 +257,96 @@ class DecimalEncoder(json.JSONEncoder):
             return str(obj)
         return super(DecimalEncoder, self).default(obj)
 
-def update_leaderboard_db(data):
+def safe_decimal(value, default=0):
+    """Safely convert a value to Decimal"""
+    if value is None:
+        return Decimal(str(default))
+    try:
+        return Decimal(str(float(value)))
+    except (ValueError, TypeError, decimal.InvalidOperation):
+        return Decimal(str(default))
+
+def update_leaderboard_db(account_data_list):
+    if not account_data_list:
+        return
+        
     conn = None
     try:
         conn = get_db_connection()
         with conn.cursor() as cur:
-            # First check if account is already breached
-            cur.execute("SELECT breached FROM leaderboard WHERE account_id = %s", (str(data["account_id"]),))
-            result = cur.fetchone()
-            if result and result[0]:
-                logging.info(f"Skipping DB update for breached account {data['account_id']}")
-                return
-
-            # Convert numeric values to Decimal for database storage
-            symbol_trade_counts_json = json.dumps(
-                {k: str(v) for k, v in data["symbol_trade_counts"].items()}, 
-                cls=DecimalEncoder
+            # Cast account_ids to numeric array
+            account_ids = [safe_decimal(data["account_id"]) for data in account_data_list]
+            cur.execute(
+                "SELECT account_id, breached FROM leaderboard WHERE account_id = ANY(%s::numeric[])",
+                (account_ids,)
             )
-            breaches_json = json.dumps(data["breaches"], cls=DecimalEncoder)
-            
-            cur.execute("""
-                UPDATE leaderboard SET 
-                    balance = %s::numeric,
-                    equity = %s::numeric,
-                    profit_loss = %s::numeric,
-                    return = %s::numeric,
-                    lots_traded = %s::numeric,
-                    average_lots = %s::numeric,
-                    most_traded_symbol = %s,
-                    total_trades = %s,
-                    winning_trades = %s,
-                    losing_trades = %s,
-                    win_rate = %s::numeric,
-                    starting_day_balance = %s::numeric,
-                    daily_dd_limit = %s::numeric,
-                    breached = %s,
-                    last_update_time = %s,
-                    symbol_trade_counts = %s::jsonb,
-                    breaches = %s::jsonb,
-                    open_positions = %s::numeric
-                WHERE account_id = %s
-            """, (
-                Decimal(str(data["balance"])),
-                Decimal(str(data["equity"])),
-                Decimal(str(data["profit_loss"])),
-                Decimal(str(data["return"])),
-                Decimal(str(data["lots_traded"])),
-                Decimal(str(data["average_lots"])),
-                data["most_traded_symbol"],
-                int(data["total_trades"]),
-                int(data["winning_trades"]),
-                int(data["losing_trades"]),
-                Decimal(str(data["win_rate"])),
-                Decimal(str(data["starting_day_balance"])),
-                Decimal(str(data["daily_dd_limit"])),
-                data["breached"],
-                datetime.now(),
-                symbol_trade_counts_json,
-                breaches_json,
-                Decimal(str(data["open_positions"])),  # Add open_positions parameter
-                str(data["account_id"])
-            ))
-            conn.commit()
+            breached_accounts = {str(row[0]): row[1] for row in cur.fetchall()}
+
+            # Prepare batch update data
+            batch_data = []
+            for data in account_data_list:
+                account_id = str(data["account_id"])
+                # Skip if account is already breached
+                if breached_accounts.get(account_id, False):
+                    logging.info(f"Skipping DB update for breached account {account_id}")
+                    continue
+
+                symbol_trade_counts_json = json.dumps(
+                    {k: str(v) for k, v in data["symbol_trade_counts"].items()}, 
+                    cls=DecimalEncoder
+                )
+                breaches_json = json.dumps(data["breaches"], cls=DecimalEncoder)
+
+                batch_data.append((
+                    safe_decimal(data["balance"]),
+                    safe_decimal(data["equity"]),
+                    safe_decimal(data["profit_loss"]),
+                    safe_decimal(data["return"]),
+                    safe_decimal(data["lots_traded"]),
+                    safe_decimal(data["average_lots"]),
+                    data["most_traded_symbol"],
+                    int(data["total_trades"]),
+                    int(data["winning_trades"]),
+                    int(data["losing_trades"]),
+                    safe_decimal(data["win_rate"]),
+                    safe_decimal(data["starting_day_balance"]),
+                    safe_decimal(data["daily_dd_limit"]),
+                    data["breached"],
+                    datetime.now(),
+                    symbol_trade_counts_json,
+                    breaches_json,
+                    safe_decimal(data["open_positions"]),
+                    str(data["account_id"])
+                ))
+
+            if batch_data:
+                cur.executemany("""
+                    UPDATE leaderboard SET 
+                        balance = %s::numeric,
+                        equity = %s::numeric,
+                        profit_loss = %s::numeric,
+                        return = %s::numeric,
+                        lots_traded = %s::numeric,
+                        average_lots = %s::numeric,
+                        most_traded_symbol = %s,
+                        total_trades = %s,
+                        winning_trades = %s,
+                        losing_trades = %s,
+                        win_rate = %s::numeric,
+                        starting_day_balance = %s::numeric,
+                        daily_dd_limit = %s::numeric,
+                        breached = %s,
+                        last_update_time = %s,
+                        symbol_trade_counts = %s::jsonb,
+                        breaches = %s::jsonb,
+                        open_positions = %s::numeric
+                    WHERE account_id = %s
+                """, batch_data)
+                conn.commit()
+                logging.info(f"Batch updated {len(batch_data)} accounts")
     except Exception as e:
         logging.error(f"Error updating database: {str(e)}")
-        traceback.print_exc()  # Add stack trace for better debugging
+        traceback.print_exc()
     finally:
         if conn:
             return_db_connection(conn)
@@ -369,35 +416,64 @@ def main():
         main_running = True
         logging.info("Starting main function.")
         
-        while True:
-            # Recreate the pool at the start of each cycle
-            recreate_db_pool()
+        with DatabasePool() as pool:
+            global db_pool
+            db_pool = pool
             
-            all_account_data = []
-            for account in ACCOUNTS:
-                data = process_account(account)
-                if data:
-                    all_account_data.append(data)
-                    time.sleep(0.5)
+            while True:
+                try:
+                    # Fetch all breach statuses at once
+                    breach_statuses = fetch_all_breach_statuses()
+                    
+                    # Fetch all starting day balances at once
+                    conn = get_db_connection()
+                    with conn.cursor() as cur:
+                        cur.execute("SELECT account_id, starting_day_balance FROM leaderboard")
+                        starting_day_balances = {str(row[0]): row[1] for row in cur.fetchall()}
+                    return_db_connection(conn)
+                    
+                    all_account_data = []
+                    for account in ACCOUNTS:
+                        account_id = str(account["account_id"])
+                        
+                        # Skip already breached accounts
+                        if breach_statuses.get(account_id, False):
+                            logging.info(f"Skipping breached account {account_id}")
+                            continue
+                            
+                        if connect_to_mt5(account):
+                            data = fetch_trading_data(
+                                account["account_id"], 
+                                account["contestant_name"],
+                                starting_day_balances
+                            )
+                            if data:
+                                all_account_data.append(data)
+                            mt5.shutdown()
+                            time.sleep(0.5)
 
-            # Update metadata after processing all accounts
-            if all_account_data:
-                update_metadata(all_account_data)
+                    # Batch update all accounts at once
+                    if all_account_data:
+                        update_leaderboard_db(all_account_data)
+                        update_metadata(all_account_data)
 
-            current_time = datetime.now()
-            next_5_minute_mark = current_time.replace(second=0, microsecond=0) + timedelta(minutes=(5 - (current_time.minute % 5)))
-            time_to_wait = (next_5_minute_mark - current_time).total_seconds()
-            if time_to_wait < 0:
-                next_5_minute_mark += timedelta(minutes=5)
-                time_to_wait = (next_5_minute_mark - current_time).total_seconds()
-            logging.info(f"Waiting for the next 5-minute mark. Waiting {time_to_wait} seconds.")
-            time.sleep(time_to_wait)
-            
+                    current_time = datetime.now()
+                    next_5_minute_mark = current_time.replace(second=0, microsecond=0) + timedelta(minutes=(5 - (current_time.minute % 5)))
+                    time_to_wait = (next_5_minute_mark - current_time).total_seconds()
+                    if time_to_wait < 0:
+                        next_5_minute_mark += timedelta(minutes=5)
+                        time_to_wait = (next_5_minute_mark - current_time).total_seconds()
+                    logging.info(f"Waiting for the next 5-minute mark. Waiting {time_to_wait} seconds.")
+                    time.sleep(time_to_wait)
+                    
+                except Exception as e:
+                    logging.error(f"Error in main loop: {str(e)}")
+                    traceback.print_exc()
+                    time.sleep(5)  # Wait before retrying
+                    
     except Exception as e:
         logging.error(f"Main function error: {str(e)}")
     finally:
-        if db_pool:
-            db_pool.closeall()
         main_running = False
 
 if __name__ == "__main__":
