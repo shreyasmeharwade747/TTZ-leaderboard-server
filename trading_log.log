@@ -570,3 +570,5 @@ server closed the connection unexpectedly
 2025-03-05 10:40:03,246 - INFO - Skipping update for breached account 239738452
 2025-03-05 10:40:03,629 - INFO - Metadata updated successfully
 2025-03-05 10:40:03,630 - INFO - Waiting for the next 5-minute mark. Waiting 296.369794 seconds.
+2025-03-06 14:52:52,758 - INFO - Starting main function.
+2025-03-06 14:52:53,355 - INFO - Database pool recreated successfully
