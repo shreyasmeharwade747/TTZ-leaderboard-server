@@ -422,6 +422,11 @@ def main():
             
             while True:
                 try:
+                    # Reconnect to database pool before each cycle
+                    logging.info("Reconnecting to database pool...")
+                    recreate_db_pool()
+                    logging.info("Database pool reconnection successful")
+
                     # Fetch all breach statuses at once
                     breach_statuses = fetch_all_breach_statuses()
                     
