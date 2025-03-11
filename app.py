@@ -101,6 +101,51 @@ def connect_to_mt5(account):
     logging.error(f"Failed to connect to account {account['account_id']}: {mt5.last_error()}")
     return False
 
+def update_starting_day_balance(account_id, new_balance, conn=None):
+    """Dedicated function to update starting day balance with retries"""
+    max_retries = 3
+    retry_delay = 1  # seconds
+    
+    for attempt in range(max_retries):
+        try:
+            should_close_conn = False
+            if conn is None:
+                conn = get_db_connection()
+                should_close_conn = True
+            
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE leaderboard 
+                    SET starting_day_balance = %s,
+                        last_update_time = NOW()
+                    WHERE account_id = %s::numeric
+                    RETURNING account_id, starting_day_balance
+                    """,
+                    (new_balance, str(account_id))
+                )
+                result = cur.fetchone()
+                conn.commit()
+                
+                if result:
+                    logging.info(f"Successfully updated starting day balance for account {account_id}: {new_balance}")
+                    return True
+                else:
+                    logging.warning(f"No rows updated for account {account_id}")
+                    return False
+                    
+        except Exception as e:
+            logging.error(f"Attempt {attempt + 1}/{max_retries} failed to update starting day balance for account {account_id}: {str(e)}")
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay)
+            continue
+        finally:
+            if should_close_conn and conn:
+                return_db_connection(conn)
+                
+    logging.error(f"Failed to update starting day balance for account {account_id} after {max_retries} attempts")
+    return False
+
 def fetch_trading_data(account_id, contestant_name, starting_day_balances):
     """Modified to accept pre-fetched starting day balances"""
     try:
@@ -113,19 +158,25 @@ def fetch_trading_data(account_id, contestant_name, starting_day_balances):
         open_positions_count = len(positions) if positions is not None else 0
         now = datetime.now()
         
-        # Use pre-fetched starting day balance
-        starting_day_balance = starting_day_balances.get(str(account_id), INITIAL_BALANCE)
+        # Use pre-fetched starting day balance with validation
+        starting_day_balance = starting_day_balances.get(str(account_id))
+        if starting_day_balance is None:
+            logging.warning(f"No starting day balance found for account {account_id}, using INITIAL_BALANCE")
+            starting_day_balance = INITIAL_BALANCE
         
-        # Update starting day balance at 3:30 AM
-        if now.hour == 3 and now.minute in (30, 31):
-            starting_day_balance = float(account_info.equity)
-            with get_db_connection() as conn:
-                with conn.cursor() as cur:
-                    cur.execute(
-                        "UPDATE leaderboard SET starting_day_balance = %s WHERE account_id = %s::numeric",
-                        (starting_day_balance, str(account_id))
-                    )
-                    conn.commit()
+        # Update starting day balance at 3:30 AM with improved logic
+        if now.hour == 3 and now.minute in range(30, 35):  # Expanded time window slightly
+            new_balance = float(account_info.equity)
+            
+            # Validate the new balance
+            if new_balance > 0:
+                logging.info(f"Attempting to update starting day balance for account {account_id}: {new_balance}")
+                if update_starting_day_balance(account_id, new_balance):
+                    starting_day_balance = new_balance
+                else:
+                    logging.error(f"Failed to update starting day balance for account {account_id}")
+            else:
+                logging.error(f"Invalid new balance value for account {account_id}: {new_balance}")
 
         # Calculate daily drawdown limit with null check
         daily_dd_limit = round(float(starting_day_balance) * 0.97, 2) if starting_day_balance is not None else round(INITIAL_BALANCE * 0.97, 2)
