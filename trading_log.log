@@ -572,3 +572,39 @@ server closed the connection unexpectedly
 2025-03-05 10:40:03,630 - INFO - Waiting for the next 5-minute mark. Waiting 296.369794 seconds.
 2025-03-06 14:52:52,758 - INFO - Starting main function.
 2025-03-06 14:52:53,355 - INFO - Database pool recreated successfully
+2025-03-20 22:48:22,522 - INFO - Starting main function.
+2025-03-20 22:48:24,461 - INFO - Reconnecting to database pool...
+2025-03-20 22:48:24,802 - INFO - Database pool recreated successfully
+2025-03-20 22:48:24,802 - INFO - Database pool reconnection successful
+2025-03-20 22:48:25,136 - INFO - Skipping breached account 203417866
+2025-03-20 22:48:25,137 - ERROR - Failed to connect to account 203412048: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,137 - ERROR - Failed to connect to account 203417902: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,137 - INFO - Skipping breached account 203411949
+2025-03-20 22:48:25,137 - INFO - Skipping breached account 203417990
+2025-03-20 22:48:25,138 - INFO - Skipping breached account 203411959
+2025-03-20 22:48:25,138 - INFO - Skipping breached account 203411933
+2025-03-20 22:48:25,138 - ERROR - Failed to connect to account 203411968: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,138 - INFO - Skipping breached account 203418023
+2025-03-20 22:48:25,139 - INFO - Skipping breached account 203418048
+2025-03-20 22:48:25,139 - INFO - Skipping breached account 203412039
+2025-03-20 22:48:25,139 - INFO - Skipping breached account 203417956
+2025-03-20 22:48:25,139 - INFO - Skipping breached account 203417933
+2025-03-20 22:48:25,139 - ERROR - Failed to connect to account 203417808: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,140 - INFO - Skipping breached account 203412058
+2025-03-20 22:48:25,140 - ERROR - Failed to connect to account 203411980: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,140 - ERROR - Failed to connect to account 203429925: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,140 - ERROR - Failed to connect to account 203411996: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,141 - ERROR - Failed to connect to account 203412030: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,141 - INFO - Skipping breached account 203411988
+2025-03-20 22:48:25,141 - INFO - Skipping breached account 203412018
+2025-03-20 22:48:25,141 - ERROR - Failed to connect to account 203423235: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,141 - INFO - Skipping breached account 203417845
+2025-03-20 22:48:25,142 - INFO - Skipping breached account 203422945
+2025-03-20 22:48:25,142 - ERROR - Failed to connect to account 203422909: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,142 - ERROR - Failed to connect to account 203451345: (-10003, 'IPC initialize failed, MetaTrader 5 x64 not found')
+2025-03-20 22:48:25,142 - INFO - Skipping breached account 203423146
+2025-03-20 22:48:25,143 - INFO - Skipping breached account 203423258
+2025-03-20 22:48:25,143 - INFO - Skipping breached account 203423107
+2025-03-20 22:48:25,143 - INFO - Skipping breached account 203411716
+2025-03-20 22:48:25,143 - INFO - Waiting for the next 5-minute mark. Waiting 94.856448 seconds.
+2025-03-20 22:48:29,991 - ERROR - Main function error: connection pool is closed
