@@ -193,6 +193,7 @@ def fetch_trading_data(account_id, contestant_name, starting_day_balances):
         total_trades = 0
         symbol_trade_count = {}
         filtered_deals = []
+        daily_profits = {}
 
         if history_deals:
             # Filter deals where entry == 0
@@ -204,9 +205,19 @@ def fetch_trading_data(account_id, contestant_name, starting_day_balances):
                 losing_trades = sum(1 for deal in filtered_deals if deal.profit < 0)
                 total_trades = len(filtered_deals) // 2
 
+                # Calculate daily profits for consistency score
                 for deal in filtered_deals:
+                    deal_time = datetime.fromtimestamp(deal.time)
+                    day_key = deal_time.strftime('%Y-%m-%d')
+                    daily_profits[day_key] = daily_profits.get(day_key, 0) + deal.profit
+                    
                     symbol = deal.symbol
                     symbol_trade_count[symbol] = symbol_trade_count.get(symbol, 0) + 1
+
+        # Calculate consistency score
+        total_profits = sum(daily_profits.values())
+        highest_profit_day = max(daily_profits.values()) if daily_profits else 0
+        consistency_score = round((highest_profit_day / total_profits * 100), 2) if total_profits != 0 else 0
 
         profit_loss = account_info.balance - INITIAL_BALANCE
 
@@ -266,7 +277,8 @@ def fetch_trading_data(account_id, contestant_name, starting_day_balances):
             "daily_dd_limit": daily_dd_limit,
             "breaches": breaches,
             "breached": is_breached,
-            "open_positions": open_positions_count  # Add open positions count
+            "open_positions": open_positions_count,  # Add open positions count
+            "consistency_score": consistency_score
         }
     except Exception as e:
         logging.error(f"Error processing account {account_id}: {str(e)}")
@@ -367,6 +379,7 @@ def update_leaderboard_db(account_data_list):
                     symbol_trade_counts_json,
                     breaches_json,
                     safe_decimal(data["open_positions"]),
+                    safe_decimal(data["consistency_score"]),
                     str(data["account_id"])
                 ))
 
@@ -390,7 +403,8 @@ def update_leaderboard_db(account_data_list):
                         last_update_time = %s,
                         symbol_trade_counts = %s::jsonb,
                         breaches = %s::jsonb,
-                        open_positions = %s::numeric
+                        open_positions = %s::numeric,
+                        consistency_score = %s::numeric
                     WHERE account_id = %s
                 """, batch_data)
                 conn.commit()
