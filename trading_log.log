@@ -608,3 +608,26 @@ server closed the connection unexpectedly
 2025-03-20 22:48:25,143 - INFO - Skipping breached account 203411716
 2025-03-20 22:48:25,143 - INFO - Waiting for the next 5-minute mark. Waiting 94.856448 seconds.
 2025-03-20 22:48:29,991 - ERROR - Main function error: connection pool is closed
+2025-07-20 12:30:27,649 - INFO - Starting main function.
+2025-07-20 12:30:31,849 - INFO - Reconnecting to database pool...
+2025-07-20 12:30:32,564 - INFO - Database pool recreated successfully
+2025-07-20 12:30:32,565 - INFO - Database pool reconnection successful
+2025-07-20 12:30:34,479 - ERROR - Failed to connect to account 79888959: (-6, 'Terminal: Authorization failed')
+2025-07-20 12:30:34,480 - INFO - Waiting for the next 5-minute mark. Waiting 265.519653 seconds.
+2025-07-20 12:30:40,459 - ERROR - Main function error: connection pool is closed
+2025-07-20 12:31:52,806 - INFO - Starting main function.
+2025-07-20 12:31:57,038 - INFO - Reconnecting to database pool...
+2025-07-20 12:31:58,365 - INFO - Database pool recreated successfully
+2025-07-20 12:31:58,366 - INFO - Database pool reconnection successful
+2025-07-20 12:32:02,294 - INFO - Connected to account 79890257
+2025-07-20 12:32:02,295 - WARNING - No starting day balance found for account 79890257, using INITIAL_BALANCE
+2025-07-20 12:32:03,238 - INFO - Batch updated 1 accounts
+2025-07-20 12:32:03,396 - INFO - Metadata updated successfully
+2025-07-20 12:32:03,397 - INFO - Waiting for the next 5-minute mark. Waiting 176.602733 seconds.
+2025-07-20 12:35:00,004 - INFO - Reconnecting to database pool...
+2025-07-20 12:35:01,366 - INFO - Database pool recreated successfully
+2025-07-20 12:35:01,367 - INFO - Database pool reconnection successful
+2025-07-20 12:35:02,006 - INFO - Connected to account 79890257
+2025-07-20 12:35:03,004 - INFO - Batch updated 1 accounts
+2025-07-20 12:35:03,311 - INFO - Metadata updated successfully
+2025-07-20 12:35:03,312 - INFO - Waiting for the next 5-minute mark. Waiting 296.688134 seconds.
